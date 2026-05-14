@@ -1,82 +1,86 @@
 # AI Robotics Learning Assistant
 
-A production-grade, RAG-powered educational assistant designed to teach robotics and electronics to students of all levels (2nd Class to Engineering).
+A production-grade, RAG-powered educational assistant designed to teach robotics and electronics to students of all levels (from 2nd-grade beginners to senior engineering students).
 
-## Features
+## 🏗️ System Architecture
 
-- **Age-Adaptive Explanations:** Dynamically adjusts tone, vocabulary, and depth based on the selected education level.
-- **RAG Pipeline:** Uses LlamaIndex and FAISS to retrieve accurate information from a custom 35-component robotics knowledge base.
-- **Modern UI:** High-fidelity ChatGPT-like interface built with Next.js 15, Tailwind CSS, and Framer Motion.
-- **Local LLM:** Powered by Qwen2.5-1.5B running on Ollama for low-memory environments.
-- **Dockerized Stack:** Fully containerized setup including Frontend, Backend, Database, and AI engine.
+The application implements a modern Retrieval-Augmented Generation (RAG) architecture to provide grounded, context-aware educational support.
+
+![System Architecture](./archture-drawio.png)
+
+### Core Components
+*   **Frontend:** Next.js 15 with Tailwind CSS and Framer Motion for a responsive, interactive chat experience.
+*   **Backend:** FastAPI (Python) orchestration layer managing API requests, session persistence, and RAG logic.
+*   **RAG Pipeline:** Built with **LlamaIndex**, utilizing **FAISS** for vector search and **HuggingFace** embeddings (`all-MiniLM-L6-v2`) for efficient local processing.
+*   **Intelligence:** **Ollama** serving the `qwen2.5:1.5b` model, optimized for low-latency inference in resource-constrained environments.
 
 ---
 
-## 🚀 How to Run
+## 🧠 How the RAG Pipeline Works
 
-### Method 1: Using Docker (Recommended)
+The assistant doesn't just "guess"—it retrieves verified knowledge from its custom robotics database.
 
-This is the fastest way to get the entire stack running correctly.
+1.  **Ingestion & Indexing:** On startup, the system processes 35+ structured markdown documents from the `/data` directory. These are chunked and converted into high-dimensional vectors.
+2.  **User Query:** When a user asks a question, the query is embedded into the same vector space.
+3.  **Semantic Retrieval:** The system performs a similarity search in the **FAISS vector store** to find the most relevant context chunks.
+4.  **Age-Adaptive Prompting:** Based on the user's education level, the system selects a specialized prompt template (e.g., using analogies for kids, technical specs for engineers).
+5.  **Augmented Generation:** The retrieved context + the specialized prompt + the user query are sent to the LLM.
+6.  **Streaming Output:** The final grounded answer is streamed back to the UI in real-time.
 
-1.  **Start all services:**
+---
+
+## 🚀 Getting Started
+
+### Method 1: Docker Deployment (Recommended)
+
+1.  **Initialize the Stack:**
     ```bash
-    docker-compose up --build
+    docker-compose up --build -d
     ```
-    *Note: The frontend will be available at [http://localhost:3000](http://localhost:3000).*
 
-2.  **Pull the AI Model:**
-    The first time you run the app, you need to pull the model inside the Ollama container:
+2.  **Pull the LLM Model:**
     ```bash
     docker exec -it ollama ollama pull qwen2.5:1.5b
     ```
 
-3.  **Access the application:**
-    - **Frontend:** [http://localhost:3000](http://localhost:3000)
-    - **Backend API:** [http://localhost:8000/docs](http://localhost:8000/docs)
+3.  **Access:**
+    - **UI:** [http://localhost:3000](http://localhost:3000)
+    - **API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
----
+### Method 2: Local Development
 
-### Method 2: Manual Setup (Development Mode)
+#### 1. Backend Setup
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-#### 1. AI Model (Ollama)
-- Install [Ollama](https://ollama.com/).
-- Run the model: `ollama run qwen2.5:1.5b`
-
-#### 2. Backend (FastAPI)
-- Navigate to the folder: `cd backend`
-- Create a virtual environment: `python -m venv venv`
-- Activate it:
-    - Linux/Mac: `source venv/bin/activate`
-    - Windows: `venv\Scripts\activate`
-- Install dependencies: `pip install -r requirements.txt`
-- Set environment variables:
-    ```bash
-    export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/robotics_db
-    export OLLAMA_BASE_URL=http://localhost:11434
-    ```
-- Start the server: `uvicorn app.main:app --reload`
-
-#### 3. Frontend (Next.js)
-- Navigate to the folder: `cd frontend`
-- Install dependencies: `npm install`
-- Start development server: `npm run dev`
-- Access at: [http://localhost:3000](http://localhost:3000)
-
----
-
-## 🛠️ Troubleshooting
-
-- **Memory Issues:** If the app is slow or crashes, ensure your system has at least 4GB-6GB of free RAM.
-- **CORS Errors:** I have enabled CORS by default in `backend/app/main.py`. If you change ports, update the `allow_origins` list.
-- **Ollama Connection:** If the backend can't find Ollama, ensure the `OLLAMA_BASE_URL` is correct. In Docker, this is `http://ollama:11434`. Manually, it is `http://localhost:11434`.
+#### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ---
 
 ## 📂 Project Structure
 
-- `/frontend`: Next.js 14 application.
-- `/backend`: FastAPI application and LlamaIndex RAG logic.
-- `/data`: Structured markdown knowledge base for the 35 robotics components.
-- `docker-compose.yml`: Full stack orchestration.
-- `AZURE_DEPLOYMENT.md`: Guide for deploying on low-RAM cloud environments.
-# Rag-With-IOT-
+- `/frontend`: Next.js application and UI components.
+- `/backend`: FastAPI server, SQLAlchemy models, and LlamaIndex RAG pipeline.
+- `/data`: Knowledge base containing 35+ robotics component profiles.
+- `/storage`: Persistent FAISS index storage.
+- `docker-compose.yml`: Multi-container orchestration.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frameworks:** Next.js 15, FastAPI
+- **RAG:** LlamaIndex, FAISS, HuggingFace
+- **LLM Engine:** Ollama (Qwen2.5)
+- **Database:** SQLite/PostgreSQL (via SQLAlchemy)
+- **Styling:** Tailwind CSS, Framer Motion
