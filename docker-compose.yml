@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: robotics_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: robotics_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: always
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  backend:
+    build: ./backend
+    container_name: robotics_backend
+    restart: always
+    depends_on:
+      - db
+      - ollama
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/robotics_db
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: robotics_frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  ollama_data:

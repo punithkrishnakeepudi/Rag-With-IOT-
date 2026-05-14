@@ -1,0 +1,23 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+*.db
+
+# Node
+node_modules/
+.next/
+out/
+build/
+dist/
+.eslintcache
+
+# Project specific
+backend/storage/*.json
+!backend/storage/default__vector_store.json # Maybe keep if essential, but usually vector stores are large
+
+# OS
+.DS_Store
+Thumbs.db

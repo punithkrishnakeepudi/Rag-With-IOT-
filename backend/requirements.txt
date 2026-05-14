@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+llama-index
+llama-index-vector-stores-faiss
+llama-index-llms-ollama
+llama-index-embeddings-huggingface
+python-dotenv
+pydantic
+pydantic-settings
+python-multipart
+faiss-cpu
